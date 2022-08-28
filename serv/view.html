@@ -11,16 +11,18 @@
 
 <div>
     <!--        один раздел страницы-->
+    <h3>Total signatures {{ .SignatureCount}}</h3>
     add your signatures -
     <a href = "/guestbook/new"> Add Your Signature</a>
 </div>
 
+
 <!--    другой раздел страницы-->
 <div>
     <!--    элементы абзаца -->
-    <p>Signatures</p>
-    <p>go</p>
-    <p>here</p>
+    {{range .Signatures}}
+    <p>Da Это мощная заметка: {{.}}</p>
+    {{end}}
 
 </div>
 <p><img src="img/vadimfotos.png" alt="myFoto"></p>
