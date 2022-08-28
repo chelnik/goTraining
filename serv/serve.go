@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"fmt"
 	"html/template"
 	"log"
 	"net/http"
@@ -20,11 +21,17 @@ func check(err error) {
 }
 func createHandler(writer http.ResponseWriter, request *http.Request) {
 	signature := request.FormValue("signature")
-	_, err := writer.Write([]byte(signature))
+	options := os.O_WRONLY | os.O_APPEND | os.O_CREATE
+	file, err := os.OpenFile("signatures.txt", options, os.FileMode(0600))
 	check(err)
+	_, err = fmt.Fprintln(file, signature)
+	check(err)
+	err = file.Close()
+	check(err)
+	http.Redirect(writer, request, "/guestbook", http.StatusFound)
 }
 func addSignatureHandler(writer http.ResponseWriter, request *http.Request) {
-	html, err := template.ParseFiles("form.html")
+	html, err := template.ParseFiles("ui/form.html")
 	check(err)
 	err = html.Execute(writer, nil)
 	check(err)
@@ -32,7 +39,7 @@ func addSignatureHandler(writer http.ResponseWriter, request *http.Request) {
 func viewHandler(writer http.ResponseWriter, request *http.Request) {
 	//message := []byte("Hi^ men!")
 	signatures := getStrings("signatures.txt")
-	html, err := template.ParseFiles("view.html")
+	html, err := template.ParseFiles("ui/view.html")
 	check(err)
 	guestbook := Guestbook{
 		SignatureCount: len(signatures),
