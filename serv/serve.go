@@ -39,7 +39,7 @@ func main() {
 	dbStruct := &info{
 		db: db,
 	}
-	http.HandleFunc("/guestbook", viewHandler)
+	http.HandleFunc("/guestbook", dbStruct.viewHandler)
 	http.HandleFunc("/guestbook/new", addSignatureHandler)
 	http.HandleFunc("/guestbook/create", dbStruct.createHandlerNew)
 	_, err = os.Stdout.Write([]byte("server created in http://localhost:4000/guestbook"))
@@ -58,7 +58,3 @@ func openDB(dsn string) (*sql.DB, error) {
 	}
 	return db, nil
 }
-
-//if err != nil {
-//	log.Println("Open db")
-//}
