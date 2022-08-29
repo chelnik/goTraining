@@ -23,7 +23,10 @@
     <!--        один раздел страницы-->
     <h3>Total signatures {{ .SignatureCount}}</h3>
     add your signatures -
-    <a href = "/guestbook/new"> Add Your Signature</a>
+    <a href = "/guestbook/new"> Add Your Signature+</a>
+    <form action="/guestbook/new" target="_blank">
+        <button>Переход по ссылке</button>
+    </form>
 </div>
 
 

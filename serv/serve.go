@@ -2,12 +2,18 @@ package main
 
 import (
 	"bufio"
+	"database/sql"
 	"fmt"
+	_ "github.com/lib/pq"
 	"html/template"
 	"log"
 	"net/http"
 	"os"
 )
+
+//type info struct {
+//	db *sql.DB
+//}
 
 type Guestbook struct {
 	SignatureCount int
@@ -30,6 +36,22 @@ func createHandler(writer http.ResponseWriter, request *http.Request) {
 	check(err)
 	http.Redirect(writer, request, "/guestbook", http.StatusFound)
 }
+
+//func createHandlerNew(writer http.ResponseWriter, request *http.Request) {
+//	signature := request.FormValue("signature")
+//	dsn := flag.String("dsn", "postgresql://corkiudy:test@127.0.0.1:5432/forProjectGo?sslmode=disable", "Название postSQL источника данных")
+//	db, err := openDB(*dsn) // инициализируем пул подключений к базе
+//	if err != nil {
+//		log.Println("Open db")
+//	}
+//	defer db.Close()
+//	_, err = db.Exec(`INSERT INTO signatures (phrase) VALUES($1)`, signature)
+//
+//	if err != nil {
+//		log.Println("go")
+//	}
+//	http.Redirect(writer, request, "/guestbook", http.StatusFound)
+//}
 func addSignatureHandler(writer http.ResponseWriter, request *http.Request) {
 	html, err := template.ParseFiles("ui/form.html")
 	check(err)
@@ -65,12 +87,30 @@ func getStrings(fileName string) []string {
 	return lines
 }
 func main() {
+	dsn := "postgresql://corkiudy:test@127.0.0.1:5432/forProjectGo?sslmode=disable"
+	db, err := openDB(dsn) // инициализируем пул подключений к базе
+	db.Close()
+
 	http.HandleFunc("/guestbook", viewHandler)
 	http.HandleFunc("/guestbook/new", addSignatureHandler)
 	http.HandleFunc("/guestbook/create", createHandler)
-	_, err := os.Stdout.Write([]byte("server created in http://localhost:4000/guestbook"))
+	_, err = os.Stdout.Write([]byte("server created in http://localhost:4000/guestbook"))
 	check(err)
-
 	err = http.ListenAndServe("localhost:4000", nil)
 	log.Fatal(err)
 }
+
+func openDB(dsn string) (*sql.DB, error) {
+	db, err := sql.Open("postgres", dsn)
+	if err != nil {
+		return nil, err
+	}
+	if err = db.Ping(); err != nil { // проверка того что все настроено правильно
+		return nil, err
+	}
+	return db, nil
+}
+
+//if err != nil {
+//	log.Println("Open db")
+//}
