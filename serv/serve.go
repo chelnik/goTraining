@@ -19,11 +19,16 @@ func (dbStruct *info) createHandlerNew(writer http.ResponseWriter, request *http
 
 	_, err := dbStruct.db.Exec(`INSERT INTO signatures (phrase) VALUES($1)`, signature)
 
-	if err != nil {
-		log.Println("error of insert:", signature, err)
-	}
+	check(err)
 	http.Redirect(writer, request, "/guestbook", http.StatusFound)
 }
+func (dbStruct *info) deleteSignature(writer http.ResponseWriter, request *http.Request) {
+	_, err := dbStruct.db.Query(`DELETE FROM signatures WHERE id = (SELECT id FROM signatures ORDER BY id DESC LIMIT 1)`)
+
+	check(err)
+	http.Redirect(writer, request, "/guestbook", http.StatusFound)
+}
+
 func addSignatureHandler(writer http.ResponseWriter, request *http.Request) {
 	html, err := template.ParseFiles("ui/form.html")
 	check(err)
@@ -42,6 +47,7 @@ func main() {
 	http.HandleFunc("/guestbook", dbStruct.viewHandler)
 	http.HandleFunc("/guestbook/new", addSignatureHandler)
 	http.HandleFunc("/guestbook/create", dbStruct.createHandlerNew)
+	http.HandleFunc("/guestbook/delete", dbStruct.deleteSignature)
 	_, err = os.Stdout.Write([]byte("server created in http://localhost:4000/guestbook"))
 	check(err)
 	err = http.ListenAndServe("localhost:4000", nil)
